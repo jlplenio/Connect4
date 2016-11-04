@@ -15,11 +15,12 @@ def initboard():
             board[y, x] = "-"
 
 def printBoard():
-    print("1", "2", "3", "4", "5", "6", "7")
     for y in range(6, 0, -1):
+        print(y, end=" ")
         for x in range(1, 8):
             print(board[y, x], end=" ")
         print()
+    print("-","1", "2", "3", "4", "5", "6", "7")
     print()
 
 def makePlay(position, sign):
@@ -76,20 +77,22 @@ def walkNeighbor(player, y, x, connect, direction):
 
     return connect
 
-initboard()
+def main():
+    initboard()
+    player = "X"
+    won = False
+    while not won:
+        while True:
+            #infloop if all columns full
+            col = randint(1,7)
+            if not isfull(col):
+                break
+        makePlay(col,player)
+        printBoard()
+        won = findWinner(player)
+        if player == "X":
+            player = "O"
+        else:
+            player = "X"
 
-player = "X"
-won = False
-while not won:
-    while True:
-        #infloop if all columns full
-        col = randint(1,7)
-        if not isfull(col):
-            break
-    makePlay(col,player)
-    printBoard()
-    won = findWinner(player)
-    if player == "X":
-        player = "O"
-    else:
-        player = "X"
+main()
