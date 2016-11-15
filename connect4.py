@@ -1,10 +1,8 @@
-from random import randint
-import copy
+import random, time
 
 class Board:
-    coords = {}
-
     def __init__(self):
+        self.coords = {}
         self.clear()
 
     def clear(self):
@@ -41,8 +39,8 @@ class Board:
                 self.coords[y, position] = sign
                 placed = True
                 break
-        if not placed:
-            print("Board is full on column: " + str(position))
+                # if not placed:
+                #    print("Board is full on column: " + str(position))
 
     def copy(self):
         newboard = Board()
@@ -50,131 +48,117 @@ class Board:
         return newboard
 
 
-def find_winner(board, player):
-    found = False
+def find_winner(board):
     for y in range(1, 7):
         for x in range(1, 8):
-            if board.coords[y, x] == player:
+            if board.coords[y, x] != "-":
+                player = board.coords[y, x]
                 if walk_neighbour(board, player, y, x, 1, "right") == 4:
-                    print(str(y) + "-" + str(x) + " Winner going right - Player " + player)
-                    found = True
+                    # print(str(y) + "-" + str(x) + " Winner going right - Player " + player)
+                    return player
                 elif walk_neighbour(board, player, y, x, 1, "up") == 4:
-                    print(str(y) + "-" + str(x) + " Winner going up - Player " + player)
-                    found = True
+                    # print(str(y) + "-" + str(x) + " Winner going up - Player " + player)
+                    return player
                 elif walk_neighbour(board, player, y, x, 1, "diaup") == 4:
-                    print(str(y) + "-" + str(x) + " Winner going diagonal up - Player " + player)
-                    found = True
+                    # print(str(y) + "-" + str(x) + " Winner going diagonal up - Player " + player)
+                    return player
                 elif walk_neighbour(board, player, y, x, 1, "diadown") == 4:
-                    print(str(y) + "-" + str(x) + " Winner going diagonal down - Player " + player)
-                    found = True
-                break
-    return found
+                    # print(str(y) + "-" + str(x) + " Winner going diagonal down - Player " + player)
+                    return player
+    return None
 
 
 def walk_neighbour(board, player, y, x, connect, direction):
-    """
-    checks for amount of adjacent 'player' signs for a connect4
-    :rtype: int
-    :return: amount
-    """
-
     if connect != 4:
         if direction == "right":
             if x < 7:
                 if board.coords[y, x + 1] == player:
                     return walk_neighbour(board, player, y, x + 1, connect + 1, "right")
+            return connect
 
         if direction == "up":
             if y < 6:
                 if board.coords[y + 1, x] == player:
                     return walk_neighbour(board, player, y + 1, x, connect + 1, "up")
+            return connect
 
         if direction == "diaup":
             if x < 7 and y < 6:
                 if board.coords[y + 1, x + 1] == player:
                     return walk_neighbour(board, player, y + 1, x + 1, connect + 1, "diaup")
+            return connect
 
         if direction == "diadown":
             if x < 7 and y > 1:
                 if board.coords[y - 1, x + 1] == player:
                     return walk_neighbour(board, player, y - 1, x + 1, connect + 1, "diadown")
-    #if connect > 2:
-    #    print("Evaluated",x,y,"with score of",connect )
+            return connect
     return connect
 
 
-def minmax_recursive(board, depth, maxdepth, player):
+def minmax_recursive(move, board, depth, maxdepth, player):
+    copyboard = board.copy()
     points = []
-    if depth > maxdepth:
-        if player == "X":
-            if find_winner(board,"X"):
-                return 10
-        elif player == "O":
-            if find_winner(board,"O"):
-                return -10
-        return 0
+    if player == "X":
+        copyboard.make_play(move, "X")
     else:
-        for move in board.possible_moves():
-            copyboard = copy.deepcopy(board)
-            if player == "X":
-                copyboard.make_play(move, "X")
-                player = "O"
-            else:
-                copyboard.make_play(move, "O")
-                player = "X"
-            points.append(minmax_recursive(copyboard, depth + 1, maxdepth, player))
-    print(points)
-    if points:
-        if player == "O":
-            return max(points)
+        copyboard.make_play(move, "O")
+
+    winnersign = find_winner(copyboard)
+    if winnersign == "X":
+        return 10
+    if winnersign == "O":
+        return -10
+
+    if depth >= maxdepth:
+        return 0
+
+    for move in board.possible_moves():
+        if player == "X":
+            points.append(minmax_recursive(move, copyboard, depth + 1, maxdepth, "O"))
         else:
-            return min(points)
-    return 0
+            points.append(minmax_recursive(move, copyboard, depth + 1, maxdepth, "X"))
+
+    if player == "O":
+        return max(points)
+    else:
+        return min(points)
+
+
 def make_aimove(board, maxdepth):
     movescoredict = {}
     for move in board.possible_moves():
-        copyboard = copy.deepcopy(board)
-        movescoredict[move] = minmax_recursive(copyboard, 0, maxdepth, "X")
+        copyboard = board.copy()
+        movescoredict[move] = minmax_recursive(move, copyboard, 0, maxdepth, "X")
     # Can't do this cuck with nested lists :/
     print(movescoredict)
-    x_bestmove = max(movescoredict, key=movescoredict.get)  # <- key from dict
-    print(movescoredict)
-    print("I would play: ", x_bestmove)
-    pass
+    highestscore = max(movescoredict.values())
+    highscorekey = random.choice([k for k, v in movescoredict.items() if v == highestscore])
 
-"""
-unable to find winner this cuck, why?
-6 - - - - - - -
-5 - - - - - - -
-4 - O - - - - -
-3 - O - - - - -
-2 - O - - - - -
-1 O O - - - - -
-- 1 2 3 4 5 6 7
-
-6 - - - - - - -
-5 - - - - - - -
-4 - - X - - - -
-3 - - X - - - -
-2 - - X - - - -
-1 X - X - - - -
-- 1 2 3 4 5 6 7
-"""
+    print("AI played:", highscorekey, end="")
+    board.make_play(highscorekey, "X")
+    return board
 
 
-b = Board()
-b.make_play(2,"X")
-b.make_play(2,"X")
-b.make_play(2,"X")
-b.make_play(3,"O")
-b.make_play(4,"O")
-b.make_play(7,"O")
-b2 = copy.deepcopy(b)
-b2.make_play(7,"O")
-b2.make_play(7,"O")
-b2.make_play(7,"O")
-b2.make_play(7,"O")
-b2.make_play(7,"O")
-b.print()
-# Veränderungen in b2 verändern auch b, obwohl copy.deepcuck... ggwp
+def main():
+    b = Board()
+    winner = None
+    b.print()
+    while b.possible_moves():
 
+        playerpos = input("Choose a row to play(1-7): ")
+        b.make_play(int(playerpos), "O")
+        b.print()
+        if find_winner(b):
+            break
+        print("The AI is thinking .............. :")
+        t = time.process_time()
+        b = make_aimove(b, 5)
+        elapsed_time = time.process_time() - t
+        print(" - calc time needed:", elapsed_time)
+        b.print()
+        if find_winner(b):
+            break
+
+
+main()
