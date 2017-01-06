@@ -189,7 +189,7 @@ def find_winner(board, move):
     connected = 0
     total = 0
     for score in scores:
-        if score[0] == 4:
+        if score[0] >= 4:
             return 1000
         connected += score[0]
         total += score[1]
@@ -274,24 +274,28 @@ main()
 
 
 
-""" DEBUG STUFF
+"""
 b = Board()
 
-b.make_play(2,"O")
-b.make_play(3,"X")
-b.make_play(4,"X")
-b.make_play(5,"X")
-b.make_play(6,"O")
-b.make_play(6,"X")
-
-b.make_play(2,"O")
-b.make_play(3,"O")
-b.make_play(4,"X")
-b.make_play(5,"X")
-
+b.make_play(1,"X")
+b.make_play(2,"X")
 b.make_play(4,"O")
 b.make_play(5,"X")
-b.print()
-make_aimove(b,5)
+b.make_play(7,"X")
 
+b.make_play(1,"O")
+b.make_play(2,"O")
+b.make_play(4,"O")
+b.make_play(5,"O")
+b.make_play(7,"O")
+
+b.make_play(4,"X")
+
+b.make_play(3,"O")
+b.make_play(3,"O")
+
+b.print()
+#make_aimove(b,3)
+find_winner(b,3)
 """
+
