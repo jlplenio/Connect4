@@ -2,6 +2,7 @@ import random, time
 
 canicount = 0
 
+
 class Board:
     def __init__(self):
         self.coords = {}
@@ -137,9 +138,9 @@ def calc_diadown(board, start, player):
     }
 
     for startend in range(3):
-        if start['x'] > 1 and start['y'] > 6:
+        if start['x'] > 1 and start['y'] < 6:
             start["x"] -= 1
-            start["y"] -= 1
+            start["y"] += 1
 
         if stop['x'] < 7 and stop['y'] > 1:
             stop['x'] += 1
@@ -156,7 +157,6 @@ def calc_diadown(board, start, player):
         else:
             connecttemp = 0
         connected = connecttemp if connecttemp > connected else connected
-
     return [connected, total]
 
 
@@ -215,6 +215,7 @@ def minmax_recursive(move, board, depth, maxdepth, player):
         if player == "O":
             return score * -1
 
+        # only positiv score for AI is returned. Enemy player is not concidered at all.
     if depth == maxdepth:
         return score
 
@@ -262,9 +263,35 @@ def main():
         print(" - calc time:", elapsed_time, "-", canicount, "total calculations")
         canicount = 0
         b.print()
+
+
 main()
 
-
 # @line 261 - AI Recursive depth
-# @line 198 - AI Move Score Weighting
+# @line 197 - AI Move Score Weighting
 # game does not end yet
+# maybe give exp value for pieces in a line
+
+
+
+""" DEBUG STUFF
+b = Board()
+
+b.make_play(2,"O")
+b.make_play(3,"X")
+b.make_play(4,"X")
+b.make_play(5,"X")
+b.make_play(6,"O")
+b.make_play(6,"X")
+
+b.make_play(2,"O")
+b.make_play(3,"O")
+b.make_play(4,"X")
+b.make_play(5,"X")
+
+b.make_play(4,"O")
+b.make_play(5,"X")
+b.print()
+make_aimove(b,5)
+
+"""
